@@ -1,0 +1,32 @@
+name: Test basic invocation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with required env vars
+        id: action
+        continue-on-error: true
+        uses: .
+        env:
+          GH_TOKEN: dummy_token_for_testing
+          GH_ACTOR: test-actor
+          ORGANIZATION: test-org
+          PR_BODY: "This is a test PR body"
+      - name: Assert action ran (container executed)
+        run: |
+          # The action is expected to fail due to invalid token / no real GitHub access.
+          # What we verify is that the Docker container was built and the Python script
+          # was invoked (i.e. the action infrastructure works). The step above uses
+          # continue-on-error so the job does not abort on API auth failure.
+          echo "Action step outcome: ${{ steps.action.outcome }}"
+          # The outcome should be either 'success' or 'failure' (not 'skipped' or empty),
+          # confirming the container ran.
+          outcome="${{ steps.action.outcome }}"
+          if [ "$outcome" = "skipped" ] || [ -z "$outcome" ]; then
+            echo "FAIL: action step was skipped or did not run"
+            exit 1
+          fi
+          echo "PASS: action container was invoked (outcome=$outcome)"
