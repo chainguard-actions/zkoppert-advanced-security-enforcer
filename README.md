@@ -11,6 +11,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.0.1 | [`v1.0.1`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v1.0.1) | [`251aeaa`](https://github.com/zkoppert/advanced-security-enforcer/commit/251aeaa42d657c716f1aedd03b9417c60d861c7f) |
 | v1.0.2 | [`v1.0.2`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v1.0.2) | [`2dc283c`](https://github.com/zkoppert/advanced-security-enforcer/commit/2dc283cc858ebb029419d111598c4ea283a6dcc3) |
 | v1.0.3 | [`v1.0.3`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v1.0.3) | [`d0ce92f`](https://github.com/zkoppert/advanced-security-enforcer/commit/d0ce92f5e99a8e23dd8a50006eecdbd8f55aa052) |
+| v2.0.0 | [`v2.0.0`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v2.0.0) | [`85fccaf`](https://github.com/zkoppert/advanced-security-enforcer/commit/85fccaf2a3854c2f298d2694433bfd772020b298) |
 | v2.0.1 | [`v2.0.1`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v2.0.1) | [`4289a3e`](https://github.com/zkoppert/advanced-security-enforcer/commit/4289a3eee8f0aa0b870ee4cf72a9ce7840ddc12c) |
 
 ## Privacy
