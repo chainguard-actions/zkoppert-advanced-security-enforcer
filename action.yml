@@ -1,0 +1,11 @@
+---
+name: 'Advanced-Security-Enforcer'
+author: 'zkoppert'
+description: 'A GitHub Action to check for new repositories and open pull
+  requests in the new repositories for code scanning.'
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/zkoppert/advanced-security-enforcer@sha256:d7a0fc0a3a8732d80da177df5be460c4e4dc0e33d07c9ffaff23945c0a1cc6e7' # v1
+branding:
+  icon: 'check-square'
+  color: 'white'
