@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v1.0.3 | [`v1.0.3`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v1.0.3) | [`d0ce92f`](https://github.com/zkoppert/advanced-security-enforcer/commit/d0ce92f5e99a8e23dd8a50006eecdbd8f55aa052) |
+| v2.0.1 | [`v2.0.1`](https://github.com/chainguard-actions/zkoppert-advanced-security-enforcer/tree/v2.0.1) | [`4289a3e`](https://github.com/zkoppert/advanced-security-enforcer/commit/4289a3eee8f0aa0b870ee4cf72a9ce7840ddc12c) |
 
 ## Privacy
 
