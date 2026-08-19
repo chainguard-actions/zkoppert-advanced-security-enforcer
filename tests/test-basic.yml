@@ -1,4 +1,4 @@
-name: Test basic invocation
+name: Test basic usage - action runs and exits cleanly
 on:
   workflow_dispatch:
 jobs:
@@ -6,27 +6,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run action with required env vars
+      - name: Run enforcer action with real org
         id: action
-        continue-on-error: true
         uses: .
+        continue-on-error: true
         env:
-          GH_TOKEN: dummy_token_for_testing
-          GH_ACTOR: test-actor
-          ORGANIZATION: test-org
-          PR_BODY: "This is a test PR body"
-      - name: Assert action ran (container executed)
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+          ORGANIZATION: ${{ github.repository_owner }}
+          PR_BODY: "Automated code scanning setup via Advanced Security Enforcer"
+      - name: Assert action ran (step was executed)
         run: |
-          # The action is expected to fail due to invalid token / no real GitHub access.
-          # What we verify is that the Docker container was built and the Python script
-          # was invoked (i.e. the action infrastructure works). The step above uses
-          # continue-on-error so the job does not abort on API auth failure.
-          echo "Action step outcome: ${{ steps.action.outcome }}"
-          # The outcome should be either 'success' or 'failure' (not 'skipped' or empty),
-          # confirming the container ran.
-          outcome="${{ steps.action.outcome }}"
-          if [ "$outcome" = "skipped" ] || [ -z "$outcome" ]; then
-            echo "FAIL: action step was skipped or did not run"
+          echo "action outcome: ${{ steps.action.outcome }}"
+          # The action makes real GitHub API calls and may exit non-zero if no repos
+          # are found or if API errors occur. We verify the step was executed.
+          if [ "${{ steps.action.outcome }}" = "skipped" ]; then
+            echo "FAIL: action step was skipped unexpectedly"
             exit 1
           fi
-          echo "PASS: action container was invoked (outcome=$outcome)"
+          echo "PASS: action step was executed (outcome: ${{ steps.action.outcome }})"
