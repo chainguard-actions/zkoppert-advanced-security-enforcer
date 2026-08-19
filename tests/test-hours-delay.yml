@@ -1,0 +1,21 @@
+name: Test with 24 hour delay window
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run Advanced Security Enforcer with 24 hour delay
+        id: action
+        uses: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+          ORGANIZATION: zkoppert
+          HOURS_DELAY: "24"
+          PR_BODY: "Automated request to add code scanning to your repository."
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with 24 hour delay window"
+          echo "PASS: action ran to completion"
