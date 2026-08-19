@@ -1,44 +1,35 @@
-name: Test basic invocation
+name: Test basic usage - no new repos
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_EVENT_NAME: push
-      GITHUB_REF: refs/heads/main
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Verify action.yml exists
+
+      - name: Set up git origin reachable inside Docker container
         run: |
-          if [ ! -f "$GITHUB_WORKSPACE/action.yml" ]; then
-            echo "FAIL: action.yml not found in workspace"
-            exit 1
-          fi
-          echo "PASS: action.yml found"
-      - name: Verify action uses docker runner
-        run: |
-          RUNNER=$(grep 'using:' "$GITHUB_WORKSPACE/action.yml" | awk '{print $2}' | tr -d "'")
-          echo "runner: $RUNNER"
-          if [ "$RUNNER" != "docker" ]; then
-            echo "FAIL: expected docker runner, got '$RUNNER'"
-            exit 1
-          fi
-          echo "PASS: action uses docker runner"
-      - name: Verify docker image is set
-        run: |
-          IMAGE=$(grep 'image:' "$GITHUB_WORKSPACE/action.yml" | awk '{print $2}' | tr -d "'")
-          echo "image: $IMAGE"
-          if [ -z "$IMAGE" ]; then
-            echo "FAIL: docker image not set in action.yml"
-            exit 1
-          fi
-          echo "PASS: docker image is set to $IMAGE"
-      - id: action
-        name: Invoke action (may fail without real credentials)
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - name: Run action with valid token and org that has no new repos
+        id: action
+        # The action reads env vars: GH_TOKEN, ORGANIZATION, GH_ACTOR, PR_BODY
+        # With a real org that has no repos created in the last 24 hours,
+        # the action should print "no repos found" and exit 0.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORGANIZATION: actions
+          GH_ACTOR: ${{ github.actor }}
+          PR_BODY: "This PR adds code scanning to your repository."
         uses: .
-        continue-on-error: true
-      - name: Assert action was invoked
+
+      - name: Assert action completed successfully
         run: |
-          echo "Action step completed (with or without credentials)"
+          echo "Action completed without error"
           echo "PASS"
