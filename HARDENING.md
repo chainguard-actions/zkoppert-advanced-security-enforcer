@@ -8,27 +8,75 @@
 
 **Test Policy SHA:** `843adf9e4b8f85d0c08b27b9d0b09dd094b54702`
 
-**Harden Agent Version:** `1`
+**Harden Agent Version:** `2`
 
-Action **zkoppert--advanced-security-enforcer/v2.0.1** was hardened automatically. 1 finding(s) were identified and resolved across 1 iteration(s).
+Action **zkoppert--advanced-security-enforcer/v2.0.1** was hardened automatically. 2 finding(s) were identified and resolved across 1 iteration(s).
 
 ## Findings Fixed
 
 ### unpinned-uses (severity: high)
 
-The action.yml uses a Docker image reference with a mutable tag ('docker://ghcr.io/zkoppert/advanced-security-enforcer:v2') instead of an immutable SHA digest. This means the image could be silently replaced with a different (potentially malicious) version without any change to the action reference. It should be pinned to a specific SHA digest, e.g., 'docker://ghcr.io/zkoppert/advanced-security-enforcer@sha256:<64-hex-char-digest> # v2'.
+Multiple files reference actions and Docker images by mutable tags instead of full 40-character SHA commit digests, making them vulnerable to supply-chain attacks.
+
+action.yml: `image: 'docker://ghcr.io/zkoppert/advanced-security-enforcer:v2'` — Docker image uses tag `:v2` instead of a SHA digest.
+
+.github/workflows/codeql-analysis.yml:
+  - `uses: actions/checkout@v4` (line 27)
+  - `uses: github/codeql-action/init@v2` (line 30)
+  - `uses: github/codeql-action/autobuild@v2` (line 34)
+  - `uses: github/codeql-action/analyze@v2` (line 37)
+
+.github/workflows/docker-image.yml:
+  - `uses: actions/checkout@v4` (line 17)
+
+.github/workflows/linter.yml:
+  - `uses: actions/checkout@v4` (line 25)
+  - `uses: docker://ghcr.io/super-linter/super-linter:latest` (line 31) — mutable `:latest` tag
+
+.github/workflows/python-package.yml:
+  - `uses: actions/checkout@v4` (line 18)
+  - `uses: actions/setup-python@v4` (line 20)
+
+.github/workflows/release-drafter.yml:
+  - `uses: release-drafter/release-drafter@v5` (line 13)
 
 Locations:
 
 - `action.yml:8`
+- `.github/workflows/codeql-analysis.yml:27`
+- `.github/workflows/codeql-analysis.yml:30`
+- `.github/workflows/codeql-analysis.yml:34`
+- `.github/workflows/codeql-analysis.yml:37`
+- `.github/workflows/docker-image.yml:17`
+- `.github/workflows/linter.yml:25`
+- `.github/workflows/linter.yml:31`
+- `.github/workflows/python-package.yml:18`
+- `.github/workflows/python-package.yml:20`
+- `.github/workflows/release-drafter.yml:13`
+
+### missing-permissions (severity: medium)
+
+Four workflow files have no top-level `permissions:` block and no job-level `permissions:` block on any of their jobs. Without explicit permissions, workflows run with the default (often broad) token permissions, violating the principle of least privilege.
+
+- .github/workflows/docker-image.yml: no permissions declared anywhere
+- .github/workflows/linter.yml: no permissions declared anywhere
+- .github/workflows/python-package.yml: no permissions declared anywhere
+- .github/workflows/release-drafter.yml: no permissions declared anywhere
+
+Locations:
+
+- `.github/workflows/docker-image.yml:1`
+- `.github/workflows/linter.yml:1`
+- `.github/workflows/python-package.yml:1`
+- `.github/workflows/release-drafter.yml:1`
 
 ## Iteration Notes
 
 ### Iteration 1
 
-**Fixes applied:** unpinned-uses
+**Fixes applied:** unpinned-uses, missing-permissions
 
 **Notes:**
 
-Replaced the mutable Docker image tag 'docker://ghcr.io/zkoppert/advanced-security-enforcer:v2' with the immutable SHA digest 'docker://ghcr.io/zkoppert/advanced-security-enforcer@sha256:e6f11a95d12568a3183a5dbbaec6ca33930aa946a9f73af1086d47b47f641ae7' in action.yml line 8. The original tag 'v2' is preserved as a comment outside the YAML quotes for readability.
+Fixed all unpinned action/image references by resolving real commit SHAs and container digests: (1) action.yml: pinned ghcr.io/zkoppert/advanced-security-enforcer:v2 to sha256 digest while preserving docker:// scheme and tag inline. (2) codeql-analysis.yml: pinned actions/checkout@v4 → SHA 11d5960a, github/codeql-action/init|autobuild|analyze@v2 → SHA b8d3b6e8. (3) docker-image.yml: pinned actions/checkout@v4 → SHA 11d5960a; added top-level permissions: {}. (4) linter.yml: pinned actions/checkout@v4 → SHA 11d5960a, pinned docker://ghcr.io/super-linter/super-linter:latest with sha256 digest inline; added top-level permissions: {} and job-level contents: read. (5) python-package.yml: pinned actions/checkout@v4 → SHA 11d5960a, actions/setup-python@v4 → SHA 7f4fc3e2; added top-level permissions: {} and job-level contents: read. (6) release-drafter.yml: pinned release-drafter/release-drafter@v5 → SHA 09c613e2; added top-level permissions: {} and job-level contents: write + pull-requests: read (minimum needed for release drafting).
 

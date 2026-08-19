@@ -5,7 +5,7 @@ description: 'A GitHub Action to check for new repositories and open pull
   requests in the new repositories for code scanning.'
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/zkoppert/advanced-security-enforcer@sha256:e6f11a95d12568a3183a5dbbaec6ca33930aa946a9f73af1086d47b47f641ae7' # v2
+  image: 'docker://ghcr.io/zkoppert/advanced-security-enforcer:v2@sha256:e6f11a95d12568a3183a5dbbaec6ca33930aa946a9f73af1086d47b47f641ae7'
 branding:
   icon: 'check-square'
   color: 'white'
