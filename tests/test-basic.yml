@@ -1,4 +1,5 @@
-name: Test basic action execution
+---
+name: Test basic usage - no new repos
 on:
   workflow_dispatch:
 jobs:
@@ -6,19 +7,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run action and capture output
+      - name: Run Advanced Security Enforcer
         id: action
-        continue-on-error: true
         uses: .
+        continue-on-error: true
         env:
-          GH_TOKEN: fake-token-for-testing
-          GH_ACTOR: test-actor
-          ORGANIZATION: test-org
-          PR_BODY: "This is a test PR body"
-      - name: Assert action ran (container executed)
+          GH_TOKEN: ${{ github.token }}
+          GH_ACTOR: ${{ github.actor }}
+          ORGANIZATION: ${{ github.repository_owner }}
+          PR_BODY: "This PR adds code scanning to your repository."
+      - name: Assert action ran
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
         run: |
-          # The action will fail due to invalid credentials, but it should
-          # have started executing (container built and ran). The step above
-          # uses continue-on-error so we just verify the workflow reached here.
-          echo "Action step completed (with or without error due to fake credentials)"
-          echo "PASS: Docker container was built and executed"
+          echo "Action outcome: $OUTCOME"
+          # The action searches for repos created in the last 24 hours.
+          # In a test environment there are typically no new repos, so the
+          # script should print "no repos found" and "done" and exit 0.
+          # We accept success or failure since API permissions may vary,
+          # but we require the action to have actually run (not skipped).
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped, expected it to run"
+            exit 1
+          fi
+          echo "Action ran with outcome: $OUTCOME"
+          echo "PASS"
